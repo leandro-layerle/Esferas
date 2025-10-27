@@ -1,0 +1,114 @@
+﻿@model Esferas.Models.ViewModels.PreguntaViewModel
+@{
+    ViewData["Title"] = Model.Id.HasValue ? "Editar Pregunta" : "Crear Pregunta";
+}
+
+<h1 class="mb-4">@ViewData["Title"]</h1>
+
+@{
+    var accion = ViewData["Title"].ToString().Contains("Editar") ? "Edit" : "Create";
+}
+  <form asp-action="@accion">
+    @if (Model.Id.HasValue)
+    {
+        <input type="hidden" asp-for="Id" />
+    }
+    <input type="hidden" asp-for="EncuestaId" />
+
+    <div class="mb-3">
+        <label asp-for="Texto" class="form-label"></label>
+        <textarea asp-for="Texto" class="form-control" rows="4"></textarea>
+        <span asp-validation-for="Texto" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="TipoRespuesta" class="form-label"></label>
+        <select asp-for="TipoRespuesta" class="form-select" asp-items="Html.GetEnumSelectList<Esferas.Models.Enums.TipoRespuesta>()"></select>
+        <span asp-validation-for="TipoRespuesta" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label for="CategoriaPrimariaId" class="form-label">Categoría Primaria</label>
+        <select asp-for="CategoriaPrimariaId" class="form-select" id="categoriaPrimaria" asp-items="Model.CategoriasPrimarias">
+            <option value="">-- Seleccionar --</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="CategoriaSecundariaId" class="form-label">Categoría Secundaria</label>
+        <select asp-for="CategoriaSecundariaId" class="form-select" id="categoriaSecundaria">
+            <option value="">-- Seleccionar --</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="CategoriaTerciariaId" class="form-label">Categoría Terciaria (opcional)</label>
+        <select asp-for="CategoriaTerciariaId" class="form-select" id="categoriaTerciaria">
+            <option value="">-- Seleccionar --</option>
+        </select>
+    </div>
+
+
+    <div class="form-check mb-2">
+        <input asp-for="EsPersonalizable" class="form-check-input" />
+        <label asp-for="EsPersonalizable" class="form-check-label"></label>
+    </div>
+
+    <div class="form-check mb-4">
+        <input asp-for="EsRelevanteParaSemaforo" class="form-check-input" />
+        <label asp-for="EsRelevanteParaSemaforo" class="form-check-label"></label>
+    </div>
+
+    <button type="submit" class="btn btn-success">Guardar</button>
+    <a asp-action="Index" asp-route-encuestaId="@Model.EncuestaId" class="btn btn-secondary">Volver</a>
+</form>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const primaria = document.getElementById("categoriaPrimaria");
+        const secundaria = document.getElementById("categoriaSecundaria");
+        const terciaria = document.getElementById("categoriaTerciaria");
+
+        if (primaria) {
+            primaria.addEventListener("change", function () {
+                const primariaId = this.value;
+                secundaria.innerHTML = '<option value="">-- Seleccionar --</option>';
+                terciaria.innerHTML = '<option value="">-- Seleccionar --</option>';
+
+                if (primariaId) {
+                    fetch(`/Categorias/Subcategorias?padreId=${primariaId}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            data.forEach(item => {
+                                const opt = document.createElement("option");
+                                opt.value = item.id;
+                                opt.textContent = item.nombre;
+                                secundaria.appendChild(opt);
+                            });
+                        });
+                }
+            });
+        }
+
+        if (secundaria) {
+            secundaria.addEventListener("change", function () {
+                const secundariaId = this.value;
+                terciaria.innerHTML = '<option value="">-- Seleccionar --</option>';
+
+                if (secundariaId) {
+                    fetch(`/Categorias/Subcategorias?padreId=${secundariaId}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            data.forEach(item => {
+                                const opt = document.createElement("option");
+                                opt.value = item.id;
+                                opt.textContent = item.nombre;
+                                terciaria.appendChild(opt);
+                            });
+                        });
+                }
+            });
+        }
+    });
+</script>
+

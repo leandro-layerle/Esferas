@@ -1,0 +1,28 @@
+﻿@model Esferas.Models.ViewModels.EncuestaViewModel
+
+@{
+    ViewData["Title"] = "Editar Encuesta";
+}
+
+<h1 class="mb-4">Editar Encuesta</h1>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="mb-3">
+        <label asp-for="EmpresaId" class="form-label"></label>
+        <select asp-for="EmpresaId" class="form-select" asp-items="Model.EmpresasDisponibles">
+            <option value="">-- Seleccione empresa --</option>
+        </select>
+        <span asp-validation-for="EmpresaId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Estado" class="form-label"></label>
+        <select asp-for="Estado" class="form-select" asp-items="Html.GetEnumSelectList<Esferas.Models.Enums.EstadoEncuesta>()"></select>
+        <span asp-validation-for="Estado" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success">Guardar</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+</form>

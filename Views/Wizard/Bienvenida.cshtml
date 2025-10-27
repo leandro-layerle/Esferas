@@ -1,0 +1,14 @@
+﻿@{
+    ViewData["Title"] = "Bienvenida";
+    var linkId = ViewBag.LinkId;
+}
+
+<div class="container text-center mt-5">
+    <h1 class="mb-4 text-primary">¡Bienvenido!</h1>
+    <p class="lead mb-3">
+        Gracias por participar en esta encuesta. Tus respuestas serán tratadas de forma <strong>anónima</strong> y serán utilizadas para mejorar procesos internos.
+    </p>
+    <p class="text-muted mb-4">La encuesta consta de varias preguntas breves. Solo tomará unos minutos completarla.</p>
+
+    <a class="btn btn-lg btn-success" asp-action="Responder" asp-route-id="@linkId">Comenzar</a>
+</div>

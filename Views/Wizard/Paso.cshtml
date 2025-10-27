@@ -1,0 +1,91 @@
+﻿@model Esferas.Models.Entities.Pregunta
+@{
+    ViewData["Title"] = "Responder Encuesta";
+    var paso = ViewBag.Paso as int? ?? 1;
+    var total = ViewBag.Total as int? ?? 1;
+    var linkId = ViewBag.LinkId as Guid? ?? Guid.Empty;
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="text-muted mb-3">Pregunta @paso de @total</h5>
+                    <h4 class="mb-4">@Model.Texto</h4>
+
+                    <form asp-action="Guardar" method="post">
+                        <input type="hidden" name="id" value="@linkId" />
+                        <input type="hidden" name="paso" value="@paso" />
+                        <input type="hidden" name="preguntaId" value="@Model.Id" />
+
+                        @if (Model.TipoRespuesta == Esferas.Models.Enums.TipoRespuesta.Escala || Model.TipoRespuesta == Esferas.Models.Enums.TipoRespuesta.EscalaYJustificacion)
+                        {
+                            <div class="d-flex justify-content-between mb-4 flex-wrap gap-2">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    var color = i switch
+                                    {
+                                        1 => "#f8d7da", // rojo claro
+                                        2 => "#f5c6cb",
+                                        3 => "#ffeeba", // amarillo
+                                        4 => "#d4edda",
+                                        5 => "#c3e6cb", // verde claro
+                                        _ => "#e2e3e5"
+                                    };
+
+                                    var label = i switch
+                                    {
+                                        1 => "Muy en desacuerdo",
+                                        2 => "En desacuerdo",
+                                        3 => "Neutral",
+                                        4 => "De acuerdo",
+                                        5 => "Totalmente de acuerdo",
+                                        _ => ""
+                                    };
+
+                                    <div class="text-center">
+                                        <input type="radio" name="respuestaNumerica" id="op_@i" value="@i" class="btn-check" autocomplete="off" required />
+                                        <label for="op_@i" class="btn escala-opcion"
+                                               style="background-color: @color; min-width: 55px;">
+                                            @i
+                                        </label>
+
+                                    </div>
+                                }
+                            </div>
+                        }
+
+                        @if (Model.TipoRespuesta == Esferas.Models.Enums.TipoRespuesta.TextoLibre || Model.TipoRespuesta == Esferas.Models.Enums.TipoRespuesta.EscalaYJustificacion)
+                        {
+                            <div class="mb-3">
+                                <label for="justificacion" class="form-label">Justificación / Comentario</label>
+                                <textarea name="justificacion" class="form-control" rows="4" required></textarea>
+                            </div>
+                        }
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                @(paso == total ? "Finalizar encuesta" : "Siguiente")
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .escala-opcion {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border: 2px solid transparent;
+        font-weight: bold;
+    }
+
+    .btn-check:checked + .escala-opcion {
+        box-shadow: 0 0 0 3px rgba(0,0,0,0.2);
+        transform: scale(1.1);
+        border-color: #333;
+    }
+</style>

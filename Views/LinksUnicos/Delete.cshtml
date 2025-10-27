@@ -1,0 +1,33 @@
+﻿@model Esferas.Models.Entities.LinkUnico
+
+@{
+    ViewData["Title"] = "Eliminar Link";
+}
+
+<h1 class="text-danger mb-4">Eliminar Link Único</h1>
+
+<h5 class="mb-3">¿Estás seguro que querés eliminar este link?</h5>
+
+<div class="card">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">ID</dt>
+            <dd class="col-sm-9">@Model.Id</dd>
+
+            <dt class="col-sm-3">Expiración</dt>
+            <dd class="col-sm-9">@Model.FechaExpiracion?.ToString("dd/MM/yyyy")</dd>
+
+            <dt class="col-sm-3">Estado</dt>
+            <dd class="col-sm-9">@Model.Estado</dd>
+
+            <dt class="col-sm-3">Usado</dt>
+            <dd class="col-sm-9">@(Model.Usado ? "Sí" : "No")</dd>
+        </dl>
+
+        <form asp-action="Delete" method="post">
+            <input type="hidden" asp-for="Id" />
+            <button type="submit" class="btn btn-danger">Eliminar</button>
+            <a asp-action="Index" asp-route-encuestaId="@Model.EncuestaId" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>

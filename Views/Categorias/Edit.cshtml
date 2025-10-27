@@ -1,0 +1,33 @@
+﻿@model Esferas.Models.ViewModels.CategoriaCreateEditViewModel
+
+@{
+    ViewData["Title"] = "Editar Categoría";
+}
+
+<h1 class="mb-4">Editar Categoría</h1>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="mb-3">
+        <label asp-for="Nombre" class="form-label"></label>
+        <input asp-for="Nombre" class="form-control" />
+        <span asp-validation-for="Nombre" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Tipo" class="form-label"></label>
+        <select asp-for="Tipo" class="form-select" asp-items="Html.GetEnumSelectList<Esferas.Models.Enums.TipoCategoria>()"></select>
+        <span asp-validation-for="Tipo" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="CategoriaPadreId" class="form-label">Categoría Padre (opcional)</label>
+        <select asp-for="CategoriaPadreId" class="form-select" asp-items="Model.ListaCategorias">
+            <option value="">-- Ninguna --</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-success">Guardar</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+</form>

@@ -1,0 +1,30 @@
+﻿@model Esferas.Models.Entities.Categoria
+
+@{
+    ViewData["Title"] = "Eliminar Categoría";
+}
+
+<h1 class="text-danger mb-4">Eliminar Categoría</h1>
+
+<h5 class="mb-3">¿Estás seguro que querés eliminar esta categoría?</h5>
+
+<div class="card">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Nombre</dt>
+            <dd class="col-sm-9">@Model.Nombre</dd>
+
+            <dt class="col-sm-3">Tipo</dt>
+            <dd class="col-sm-9">@Model.Tipo</dd>
+
+            <dt class="col-sm-3">Categoría Padre</dt>
+            <dd class="col-sm-9">@Model.CategoriaPadre?.Nombre</dd>
+        </dl>
+
+        <form asp-action="Delete" method="post">
+            <input type="hidden" asp-for="Id" />
+            <button type="submit" class="btn btn-danger">Eliminar</button>
+            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>

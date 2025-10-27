@@ -1,0 +1,26 @@
+﻿@model Esferas.Models.ViewModels.LinkUnicoViewModel
+
+@{
+    ViewData["Title"] = "Generar Links Únicos";
+}
+
+<h1 class="mb-4">Generar Links Únicos</h1>
+
+<form asp-action="Create" method="post">
+    <input type="hidden" asp-for="EncuestaId" />
+
+    <div class="mb-3">
+        <label asp-for="Cantidad" class="form-label"></label>
+        <input asp-for="Cantidad" class="form-control" type="number" min="1" />
+        <span asp-validation-for="Cantidad" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="FechaExpiracion" class="form-label"></label>
+        <input asp-for="FechaExpiracion" type="date" class="form-control" />
+        <span asp-validation-for="FechaExpiracion" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success">Generar</button>
+    <a asp-action="Index" asp-route-encuestaId="@Model.EncuestaId" class="btn btn-secondary">Cancelar</a>
+</form>

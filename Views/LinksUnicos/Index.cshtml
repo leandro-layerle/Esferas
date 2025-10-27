@@ -1,0 +1,65 @@
+﻿@model IEnumerable<Esferas.Models.Entities.LinkUnico>
+@{
+    ViewData["Title"] = "Links Únicos";
+    var encuestaId = ViewBag.EncuestaId;
+}
+
+<h1 class="mb-4">Links Únicos</h1>
+
+<a class="btn btn-primary mb-3" asp-action="Create" asp-route-encuestaId="@encuestaId">Generar Nuevo Link</a>
+
+<table class="table table-bordered table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Expira</th>
+            <th>Estado</th>
+            <th>Usado</th>
+            <th>Link</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var l in Model)
+        {
+            <tr>
+                <td>@l.Id</td>
+                <td>@l.FechaExpiracion?.ToString("dd/MM/yyyy")</td>
+                <td>
+                    @switch (l.Estado)
+                    {
+                        case Esferas.Models.Enums.EstadoLink.Activo:
+                            <span class="badge bg-info text-dark">Activo</span>
+                            break;
+                        case Esferas.Models.Enums.EstadoLink.Respondido:
+                            <span class="badge bg-success">Respondido</span>
+                            break;
+                        case Esferas.Models.Enums.EstadoLink.Expirado:
+                            <span class="badge bg-secondary">Expirado</span>
+                            break;
+                    }
+                </td>
+                <td>
+                    @if (l.Usado)
+                    {
+                        <span class="badge bg-success">Sí</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning text-dark">No</span>
+                    }
+                </td>
+                @{
+                    var linkCompleto = Url.Action("Bienvenida", "Wizard", new { id = l.Id }, protocol: Context.Request.Scheme);
+                }
+                <td>
+                    <a href="@linkCompleto" target="_blank">Abrir</a><br />
+                    <code>@linkCompleto</code>
+                </td>
+                <td>
+                    <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@l.Id">Eliminar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

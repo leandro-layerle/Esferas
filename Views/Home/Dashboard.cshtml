@@ -1,0 +1,383 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="container mt-4">
+    <!-- Título -->
+    <div class="row mb-3">
+        <div class="col">
+            <h2 class="fw-bold">Panel de Control</h2>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <form id="filtrosDashboard" class="row g-3 mb-4">
+
+        <div class="col-md-4">
+            <label for="empresa" class="form-label">Empresa</label>
+            <select class="form-select" id="empresa"></select>
+        </div>
+
+        <div class="col-md-4">
+            <label for="encuesta" class="form-label">Encuesta</label>
+            <select class="form-select" id="encuesta"></select>
+        </div>
+
+        <div class="col-md-4 d-flex align-items-end">
+            <button type="button" id="btnLimpiarFiltros" class="btn btn-light w-100 shadow-sm d-flex align-items-center justify-content-center">
+                <span id="iconoFiltro" class="me-2"><i class="bi bi-arrow-counterclockwise"></i></span>
+                <span id="textoFiltro">Limpiar filtros</span>
+                <span id="spinnerFiltro" class="spinner-border spinner-border-sm ms-2" role="status" style="display: none;"></span>
+            </button>
+        </div>
+
+    </form>
+
+    <div id="spinnerCargaDashboard" class="text-center my-3" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="row mb-4 align-items-stretch">
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Encuestas</h6>
+                    <h3 class="fw-bold text-primary" id="totalEncuestas">0</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Encues. completadas</h6>
+                    <h3 class="fw-bold text-success" id="encuestasCompletadas">0</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Prom. Efectividad</h6>
+                    <h3 class="fw-bold text-info" id="promedioEfectividad">0</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Esferas en Rojo</h6>
+                    <button type="button" class="btn fw-bold text-danger p-0 border-0 bg-transparent" id="btnVerEsferasRojas">
+                        <h3 class="fw-bold text-danger m-0" id="esferasEnRojo">0</h3>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos (placeholder) -->
+
+
+    <!-- Gráficos alineados y con altura uniforme -->
+    <div class="row">
+        <!-- Donut -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100 d-flex flex-column">
+                <div class="card-body d-flex flex-column">
+                    <h6 class="card-title">Distribución por Esfera</h6>
+                    <div class="chart-container flex-grow-1" style="position: relative; height: 300px;">
+                        <canvas id="graficoDonut"></canvas>
+                    </div>
+                    <div id="sinDatosDonut" class="text-muted text-center mt-3" style="display: none;">
+                        No hay datos para mostrar.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Barras -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100 d-flex flex-column">
+                <div class="card-body d-flex flex-column">
+                    <h6 class="card-title">Comparativa de Semáforos</h6>
+                    <div class="chart-container flex-grow-1" style="position: relative; height: 300px;">
+                        <canvas id="graficoBarras"></canvas>
+                    </div>
+                    <div id="sinDatosBarras" class="text-muted text-center mt-3" style="display: none;">
+                        No hay datos para mostrar.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+<!-- Modal de Esferas en Rojo -->
+<div class="modal fade" id="modalEsferasRojas" tabindex="-1" aria-labelledby="modalEsferasRojasLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="modalEsferasRojasLabel">Detalle de Esferas en Rojo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div id="contenidoModalEsferasRojas" class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Esfera</th>
+                                <th>Promedio</th>
+                                <th>Encuesta</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaEsferasRojas">
+                            <!-- Aquí se insertan filas dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="sinEsferasRojas" class="text-muted text-center">No hay esferas en rojo para mostrar.</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+
+     function todosLosCamposSonCero(objeto) {
+        for (const propiedad in objeto) {
+        if (objeto.hasOwnProperty(propiedad)) {
+            if (objeto[propiedad] !== 0) {
+            return false;
+            }
+        }
+        }
+        return true;
+     }
+
+     document.getElementById('btnLimpiarFiltros').addEventListener('click', async () => {
+        const btn = document.getElementById('btnLimpiarFiltros');
+        const spinner = document.getElementById('spinnerFiltro');
+        const icono = document.getElementById('iconoFiltro');
+
+        // Mostrar spinner y desactivar botón
+        spinner.style.display = 'inline-block';
+        icono.style.display = 'none';
+        btn.disabled = true;
+
+        // Limpiar selects
+        document.getElementById('empresa').value = '';
+        document.getElementById('encuesta').innerHTML = '';
+
+        // Recargar todo
+        await cargarKpis();
+        await cargarGraficoDonut();
+        await cargarGraficoBarras();
+
+        // Restaurar botón
+        spinner.style.display = 'none';
+        icono.style.display = 'inline-block';
+        btn.disabled = false;
+     });
+
+
+      async function cargarGraficoBarras() {
+            const filtros = obtenerFiltros();
+
+            const params = new URLSearchParams(filtros).toString();
+            const response = await fetch('/Home/ObtenerPromediosPorEsfera?' + params);
+            const data = await response.json();
+
+            if (window.graficoBarras instanceof Chart) {
+                window.graficoBarras.destroy();
+            }
+
+            const canvas = document.getElementById('graficoBarras');
+            const sinDatosDiv = document.getElementById('sinDatosBarras');
+
+            if (!data || data.length === 0) {
+                canvas.style.display = 'none';
+                sinDatosDiv.style.display = 'block';
+                return;
+            } else {
+                canvas.style.display = 'block';
+                sinDatosDiv.style.display = 'none';
+            }
+
+            const labels = data.map(x => x.esfera);
+            const valores = data.map(x => x.promedio);
+
+            window.graficoBarras = new Chart(document.getElementById('graficoBarras'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Promedio de efectividad',
+                        data: valores,
+                        backgroundColor: '#007bff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, max: 5 }
+                    }
+                }
+            });
+        }
+
+       async function cargarGraficoDonut() {
+            const filtros = obtenerFiltros();
+
+            const params = new URLSearchParams(filtros).toString();
+            const response = await fetch('/Home/ObtenerDistribucionSemaforo?' + params);
+            const data = await response.json();
+
+            // Destruir gráfico anterior si existe
+            if (window.graficoDonut instanceof Chart) {
+              window.graficoDonut.destroy();
+            }
+
+            const canvas = document.getElementById('graficoDonut');
+            const sinDatosDiv = document.getElementById('sinDatosDonut');
+
+               if (!data || data.length === 0 || todosLosCamposSonCero(data)) {
+                canvas.style.display = 'none';
+                sinDatosDiv.style.display = 'block';
+                return;
+            } else {
+                canvas.style.display = 'block';
+                sinDatosDiv.style.display = 'none';
+            }
+
+            window.graficoDonut = new Chart(document.getElementById('graficoDonut'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Rojo', 'Amarillo', 'Verde'],
+                    datasets: [{
+                        data: [data.rojo, data.amarillo, data.verde],
+                        backgroundColor: ['#dc3545', '#ffc107', '#28a745']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        async function cargarEmpresas() {
+            const response = await fetch('/Home/ObtenerEmpresas');
+            const empresas = await response.json();
+
+            const select = document.getElementById('empresa');
+            select.innerHTML = '<option value="">Todas</option>';
+            empresas.forEach(e => {
+                const option = document.createElement('option');
+                option.value = e.id;
+                option.text = e.nombre;
+                select.appendChild(option);
+            });
+        }
+
+        async function cargarEncuestas(empresaId) {
+            const response = await fetch(`/Home/ObtenerEncuestasPorEmpresa?empresaId=${empresaId}`);
+            const encuestas = await response.json();
+
+            const select = document.getElementById('encuesta');
+            select.innerHTML = '<option value="">Todas</option>';
+            encuestas.forEach(e => {
+                const option = document.createElement('option');
+                option.value = e.id;
+                option.text = e.id;
+                select.appendChild(option);
+            });
+        }
+
+        document.getElementById('empresa').addEventListener('change', e => {
+            const empresaId = e.target.value;
+            if (empresaId) cargarEncuestas(empresaId);
+            else document.getElementById('encuesta').innerHTML = '<option value="">Todas</option>';
+        });
+
+        async function cargarKpis() {
+            const filtros = obtenerFiltros();
+
+            const params = new URLSearchParams(filtros).toString();
+            const response = await fetch('/Home/ObtenerKpis?' + params);
+            const kpis = await response.json();
+
+            document.getElementById('totalEncuestas').innerText = kpis.totalEncuestas;
+            document.getElementById('encuestasCompletadas').innerText = kpis.encuestasCompletadas;
+            document.getElementById('promedioEfectividad').innerText = kpis.promedioEfectividad;
+            document.getElementById('esferasEnRojo').innerText = kpis.esferasEnRojo;
+        }
+
+        function obtenerFiltros() {
+            return {
+                empresaId: document.getElementById("empresa").value || null,
+                encuestaId: document.getElementById("encuesta").value || null
+            };
+        }
+
+      document.getElementById('filtrosDashboard').addEventListener('change', async () => {
+            const spinner = document.getElementById('spinnerCargaDashboard');
+            spinner.style.display = 'block';
+
+            await cargarKpis();
+            await cargarGraficoDonut();
+            await cargarGraficoBarras();
+
+            spinner.style.display = 'none';
+        });
+
+        document.getElementById('btnVerEsferasRojas').addEventListener('click', async () => {
+            const filtros = obtenerFiltros();
+            const params = new URLSearchParams(filtros).toString();
+            const response = await fetch('/Home/ObtenerEsferasRojas?' + params);
+            const data = await response.json();
+
+            const tbody = document.getElementById('tablaEsferasRojas');
+            const sinDatos = document.getElementById('sinEsferasRojas');
+
+            tbody.innerHTML = '';
+
+            if (!data || data.length === 0) {
+                sinDatos.style.display = 'block';
+            } else {
+                sinDatos.style.display = 'none';
+                data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${row.esfera}</td>
+                        <td>${row.promedio.toFixed(2)}</td>
+                        <td>${row.encuesta}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            const modal = new bootstrap.Modal(document.getElementById('modalEsferasRojas'));
+            modal.show();
+        });
+
+
+        document.addEventListener("DOMContentLoaded", (event) => {
+          cargarEmpresas();
+          cargarKpis();
+          cargarGraficoDonut();
+          cargarGraficoBarras();
+        });
+    </script>
+}

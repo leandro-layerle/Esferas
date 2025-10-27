@@ -1,0 +1,90 @@
+﻿@model IEnumerable<Esferas.Models.Entities.Categoria>
+
+@{
+    ViewData["Title"] = "Categorías";
+}
+
+<h1 class="mb-4">Categorías</h1>
+
+<a class="btn btn-primary mb-3" asp-action="Create">Nueva Categoría</a>
+
+<table class="table table-bordered table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>Nombre</th>
+            <th>Tipo</th>
+            <th>Categoría Padre</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            var esSecundaria = item.Nombre.TrimStart().StartsWith("──");
+            var esTerciaria = item.Nombre.TrimStart().StartsWith("────");
+            var claseGrupo = $"grupo-{item.CategoriaPadreId}";
+
+            if (!esSecundaria && !esTerciaria) // Primaria
+            {
+                <tr class="table-primary categoria-toggle" data-target=".grupo-@item.Id" style="cursor: pointer;">
+                    <td colspan="4">
+                        <i class="bi bi-caret-right-fill me-2"></i><strong>@item.Nombre</strong>
+                    </td>
+                </tr>
+            }
+
+            <tr class="@claseGrupo" style="display: none;">
+                <td>
+                    @if (esTerciaria)
+                    {
+                        <span class="ms-4"><i class="bi bi-file-earmark-text-fill text-muted me-1"></i>@item.Nombre.TrimStart('─', ' ')</span>
+                    }
+                    else if (esSecundaria)
+                    {
+                        <span class="ms-2"><i class="bi bi-folder2 text-warning me-1"></i>@item.Nombre.TrimStart('─', ' ')</span>
+                    }
+                </td>
+                <td>@item.Tipo</td>
+                <td>@item.CategoriaPadre?.Nombre</td>
+                <td>
+                    <a class="btn btn-warning btn-sm" asp-action="Edit" asp-route-id="@item.Id">Editar</a>
+                    <a class="btn btn-danger btn-sm" asp-action="Delete" asp-route-id="@item.Id">Eliminar</a>
+                </td>
+            </tr>
+        }
+
+
+    </tbody>
+</table>
+
+<script>
+    document.querySelectorAll('.categoria-toggle').forEach(toggle => {
+        toggle.addEventListener('click', function () {
+            const target = this.dataset.target;
+            const icon = this.querySelector('i');
+
+            document.querySelectorAll(target).forEach(row => {
+                row.style.display = row.style.display === 'none' ? '' : 'none';
+            });
+
+            icon.classList.toggle('bi-caret-right-fill');
+            icon.classList.toggle('bi-caret-down-fill');
+        });
+    });
+</script>
+
+
+@functions {
+    private string RenderNombreJerarquico(Esferas.Models.Entities.Categoria cat)
+    {
+        var nivel = cat.Tipo switch
+        {
+            Esferas.Models.Enums.TipoCategoria.Secundaria => 1,
+            Esferas.Models.Enums.TipoCategoria.Terciaria => 2,
+            _ => 0
+        };
+
+        var indent = new string('\u00A0', nivel * 6); // Espacios no separables
+        return $"{indent}{cat.Nombre}";
+    }
+}

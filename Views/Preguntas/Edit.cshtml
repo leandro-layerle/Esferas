@@ -1,0 +1,61 @@
+﻿@model Esferas.Models.ViewModels.PreguntaViewModel
+@{
+    ViewData["Title"] = Model.Id.HasValue ? "Editar Pregunta" : "Crear Pregunta";
+}
+
+<h1 class="mb-4">@ViewData["Title"]</h1>
+
+@{
+    var accion = ViewData["Title"].ToString().Contains("Editar") ? "Edit" : "Create";
+}
+<form asp-action="@accion">
+    @if (Model.Id.HasValue)
+    {
+        <input type="hidden" asp-for="Id" />
+    }
+    <input type="hidden" asp-for="EncuestaId" />
+
+    <div class="mb-3">
+        <label asp-for="Texto" class="form-label"></label>
+        <textarea asp-for="Texto" class="form-control" rows="4"></textarea>
+        <span asp-validation-for="Texto" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="TipoRespuesta" class="form-label"></label>
+        <select asp-for="TipoRespuesta" class="form-select" asp-items="Html.GetEnumSelectList<Esferas.Models.Enums.TipoRespuesta>()"></select>
+        <span asp-validation-for="TipoRespuesta" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="CategoriaPrimariaId" class="form-label"></label>
+        <select asp-for="CategoriaPrimariaId" class="form-select" asp-items="Model.CategoriasPrimarias"></select>
+        <span asp-validation-for="CategoriaPrimariaId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="CategoriaSecundariaId" class="form-label"></label>
+        <select asp-for="CategoriaSecundariaId" class="form-select" asp-items="Model.CategoriasSecundarias"></select>
+        <span asp-validation-for="CategoriaSecundariaId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="CategoriaTerciariaId" class="form-label"></label>
+        <select asp-for="CategoriaTerciariaId" class="form-select" asp-items="Model.CategoriasTerciarias">
+            <option value="">-- Ninguna --</option>
+        </select>
+    </div>
+
+    <div class="form-check mb-2">
+        <input asp-for="EsPersonalizable" class="form-check-input" />
+        <label asp-for="EsPersonalizable" class="form-check-label"></label>
+    </div>
+
+    <div class="form-check mb-4">
+        <input asp-for="EsRelevanteParaSemaforo" class="form-check-input" />
+        <label asp-for="EsRelevanteParaSemaforo" class="form-check-label"></label>
+    </div>
+
+    <button type="submit" class="btn btn-success">Guardar</button>
+    <a asp-action="Index" asp-route-encuestaId="@Model.EncuestaId" class="btn btn-secondary">Volver</a>
+</form>

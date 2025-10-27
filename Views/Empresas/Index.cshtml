@@ -1,0 +1,32 @@
+﻿@model IEnumerable<Esferas.Models.Entities.Empresa>
+
+@{
+    ViewData["Title"] = "Empresas";
+}
+
+<h1 class="mb-4">Empresas</h1>
+
+<a class="btn btn-primary mb-3" asp-action="Create">Nueva Empresa</a>
+
+<table class="table table-bordered table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>Nombre</th>
+            <th>Cultura</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var empresa in Model)
+        {
+            <tr>
+                <td>@empresa.Nombre</td>
+                <td>@empresa.Cultura</td>
+                <td>
+                    <a class="btn btn-sm btn-warning" asp-action="Edit" asp-route-id="@empresa.Id">Editar</a>
+                    <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@empresa.Id">Eliminar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

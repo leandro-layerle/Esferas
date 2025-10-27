@@ -1,0 +1,35 @@
+﻿@model Esferas.Models.Entities.Pregunta
+@{
+    ViewData["Title"] = "Eliminar Pregunta";
+}
+
+<h1 class="text-danger mb-4">Eliminar Pregunta</h1>
+
+<h5 class="mb-3">¿Estás seguro que querés eliminar esta pregunta?</h5>
+
+<div class="card">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Texto</dt>
+            <dd class="col-sm-9">@Model.Texto</dd>
+
+            <dt class="col-sm-3">Tipo</dt>
+            <dd class="col-sm-9">@Model.TipoRespuesta</dd>
+
+            <dt class="col-sm-3">Primaria</dt>
+            <dd class="col-sm-9">@Model.CategoriaPrimaria?.Nombre</dd>
+
+            <dt class="col-sm-3">Secundaria</dt>
+            <dd class="col-sm-9">@Model.CategoriaSecundaria?.Nombre</dd>
+
+            <dt class="col-sm-3">Terciaria</dt>
+            <dd class="col-sm-9">@Model.CategoriaTerciaria?.Nombre</dd>
+        </dl>
+
+        <form asp-action="Delete" method="post">
+            <input type="hidden" asp-for="Id" />
+            <button type="submit" class="btn btn-danger">Eliminar</button>
+            <a asp-action="Index" asp-route-encuestaId="@Model.EncuestaId" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>

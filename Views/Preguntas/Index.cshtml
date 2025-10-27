@@ -1,0 +1,131 @@
+﻿@model IEnumerable<Esferas.Models.Entities.Pregunta>
+@{
+    ViewData["Title"] = "Preguntas";
+    var encuestaId = ViewBag.EncuestaId;
+
+}
+
+<style>
+    .scroll-log {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+</style>
+
+<h1 class="mb-4">Preguntas de la Encuesta</h1>
+<h4 class="text-muted">@ViewBag.EncuestaNombre</h4>
+
+
+<a class="btn btn-primary mb-3" asp-action="Create" asp-route-encuestaId="@encuestaId">Agregar Pregunta</a>
+<!-- Botón para abrir el modal -->
+<a class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#modalImportarPreguntas">
+    Importar Preguntas
+</a>
+
+<!-- Modal Bootstrap -->
+<div class="modal fade" id="modalImportarPreguntas" tabindex="-1" aria-labelledby="modalImportarPreguntasLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalImportarPreguntasLabel">Importar preguntas desde archivo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="formImportarPreguntas" enctype="multipart/form-data">
+                    <input type="hidden" name="encuestaId" value="@ViewBag.EncuestaId" />
+
+                    <div class="mb-3">
+                        <label for="archivoExcel" class="form-label">Seleccionar archivo Excel</label>
+                        <input class="form-control" type="file" id="archivoExcel" name="archivoExcel" required />
+                    </div>
+
+                    <div id="resultadoImportacion" class="mt-3 scroll-log"></div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" id="btnImportarArchivo" class="btn btn-success">
+                    Importar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        document.getElementById("btnImportarArchivo").addEventListener("click", function () {
+            const archivoInput = document.getElementById("archivoExcel");
+            const resultadoDiv = document.getElementById("resultadoImportacion");
+
+            if (!archivoInput.files.length) {
+                resultadoDiv.innerHTML = `<div class="alert alert-warning">Por favor, selecciona un archivo.</div>`;
+                return;
+            }
+
+            const formData = new FormData(document.getElementById("formImportarPreguntas"));
+
+            fetch('@Url.Action("ImportarDesdeArchivo", "Preguntas")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                const { logs, fueExito } = data;
+
+                if (fueExito) {
+                    resultadoDiv.innerHTML = `<div class="alert alert-success">Se importaron correctamente ${logs.length} preguntas.</div>`;
+                } else {
+                    const errores = logs.map(log =>
+                        `<tr class="${log.esExito ? 'table-success' : 'table-danger'}">
+                            <td>${log.fila}</td><td>${log.mensaje}</td><td>${log.esExito ? '✔️' : '❌'}</td>
+                        </tr>`).join('');
+
+                    resultadoDiv.innerHTML = `
+                        <div class="alert alert-danger">No se importaron preguntas debido a errores:</div>
+                        <table class="table table-sm mt-2">
+                            <thead><tr><th>Fila</th><th>Mensaje</th><th>Estado</th></tr></thead>
+                            <tbody>${errores}</tbody>
+                        </table>`;
+                }
+            })
+            .catch(err => {
+                resultadoDiv.innerHTML = `<div class="alert alert-danger">Error al procesar el archivo.</div>`;
+            });
+        });
+    </script>
+
+}
+
+
+<table class="table table-bordered table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>Texto</th>
+            <th>Tipo</th>
+            <th>Primaria</th>
+            <th>Secundaria</th>
+            <th>Terciaria</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var p in Model)
+        {
+            <tr>
+                <td>@p.Texto</td>
+                <td>@p.TipoRespuesta</td>
+                <td>@p.CategoriaPrimaria?.Nombre</td>
+                <td>@p.CategoriaSecundaria?.Nombre</td>
+                <td>@p.CategoriaTerciaria?.Nombre</td>
+                <td>
+                    <a class="btn btn-sm btn-warning" asp-action="Edit" asp-route-id="@p.Id">Editar</a>
+                    <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@p.Id">Eliminar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

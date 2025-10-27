@@ -1,0 +1,53 @@
+﻿@model IEnumerable<Esferas.Models.Entities.Encuesta>
+
+@{
+    ViewData["Title"] = "Encuestas";
+}
+
+<h1 class="mb-4">Encuestas</h1>
+
+<a class="btn btn-primary mb-3" asp-action="Create">Nueva Encuesta</a>
+
+<table class="table table-bordered table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>Empresa</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var e in Model)
+        {
+            <tr>
+                <td>@e.Empresa?.Nombre</td>
+                <td>@e.FechaCreacion.ToString("dd/MM/yyyy")</td>
+                <td>
+                    @switch (e.Estado)
+                    {
+                        case Esferas.Models.Enums.EstadoEncuesta.Pendiente:
+                            <span class="badge bg-secondary">Pendiente</span>
+                            break;
+                        case Esferas.Models.Enums.EstadoEncuesta.EnCurso:
+                            <span class="badge bg-info text-dark">En Curso</span>
+                            break;
+                        case Esferas.Models.Enums.EstadoEncuesta.Finalizada:
+                            <span class="badge bg-success">Finalizada</span>
+                            break;
+                    }
+                </td>
+                <td>
+                    <a class="btn btn-sm btn-warning" asp-action="Edit" asp-route-id="@e.Id">Editar</a>
+                    <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@e.Id">Eliminar</a>
+
+                    <a class="btn btn-sm btn-info" asp-controller="Preguntas" asp-action="Index" asp-route-encuestaId="@e.Id">Preguntas</a>
+                    <a class="btn btn-sm btn-secondary" asp-controller="LinksUnicos" asp-action="Index" asp-route-encuestaId="@e.Id">Links</a>
+                    <a class="btn btn-sm btn-info" asp-controller="Resultados" asp-action="Index" asp-route-encuestaId="@e.Id">
+                        Ver Resultados
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
