@@ -16,7 +16,9 @@ namespace Esferas.Models.Entities
 
         public DateTime? FechaFinalizacion { get; set; }
         public DateTime? FechaExpiracion { get; set; }
+        public DateTime? FechaCreacion { get; set; }
 
         public bool Usado { get; set; }
+        public bool EsLinkEmpresa { get; set; } = false;
     }
 }

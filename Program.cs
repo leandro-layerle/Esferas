@@ -38,6 +38,8 @@ builder.Services.ConfigureApplicationCookie(options =>
 // builder.Services.AddRazorPages();
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<PreguntaImportService>();
+builder.Services.AddScoped<LinkUnicoService>();
+builder.Services.AddScoped<ResultadosEmpresaService>();
 builder.Services.AddScoped<DashboardService>();
 
 var app = builder.Build();

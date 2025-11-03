@@ -89,6 +89,10 @@ namespace Esferas.Data
                  .HasDefaultValueSql("NEWID()"); // default al insertar
             });
 
+            modelBuilder.Entity<LinkUnico>()
+                .Property(l => l.EsLinkEmpresa)
+                .HasDefaultValue(false);
+
             modelBuilder.Entity<Resultado>()
                 .HasOne(r => r.Encuesta)
                 .WithMany()

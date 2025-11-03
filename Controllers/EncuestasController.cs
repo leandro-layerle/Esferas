@@ -2,6 +2,7 @@
 using Esferas.Models.Entities;
 using Esferas.Models.Enums;
 using Esferas.Models.ViewModels;
+using Esferas.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -13,10 +14,12 @@ namespace Esferas.Controllers
     public class EncuestasController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly LinkUnicoService _linkUnicoService;
 
-        public EncuestasController(ApplicationDbContext context)
+        public EncuestasController(ApplicationDbContext context, LinkUnicoService linkUnicoService)
         {
             _context = context;
+            _linkUnicoService = linkUnicoService;
         }
 
         public async Task<IActionResult> Index()
@@ -122,5 +125,20 @@ namespace Esferas.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> GenerarLinkEmpresa(int encuestaId)
+        {
+            var encuesta = await _context.Encuestas.FindAsync(encuestaId);
+            if (encuesta == null)
+                return NotFound();
+
+            var url = await _linkUnicoService.GenerarLinkEmpresaAsync(encuestaId);
+
+            TempData[$"LinkEmpresa_{encuestaId}"] = url;
+            return RedirectToAction("Edit", new { id = encuestaId });
+        }
+
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Esferas.Data;
 using Esferas.Models.Entities;
 using Esferas.Models.ViewModels;
+using Esferas.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,11 +12,14 @@ namespace Esferas.Controllers
     public class EmpresasController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ResultadosEmpresaService _resultadosService;
 
-        public EmpresasController(ApplicationDbContext context)
+        public EmpresasController(ApplicationDbContext context, ResultadosEmpresaService resultadosService)
         {
             _context = context;
+            _resultadosService = resultadosService;
         }
+
 
         public async Task<IActionResult> Index()
         {
@@ -98,5 +102,17 @@ namespace Esferas.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+        [HttpGet("/empresa/r/{token}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Resultados(Guid token)
+        {
+            var viewModel = await _resultadosService.ObtenerResultadosPorTokenAsync(token);
+            if (viewModel == null)
+                return NotFound();
+
+            return View("Resultados", viewModel);
+        }
+
     }
 }
