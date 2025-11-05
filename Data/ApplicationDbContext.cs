@@ -18,6 +18,8 @@ namespace Esferas.Data
         public DbSet<Respuesta> Respuestas { get; set; }
         public DbSet<LinkUnico> LinksUnicos { get; set; }
         public DbSet<Resultado> Resultados { get; set; }
+        public DbSet<InformeGenerado> InformesGenerados { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -102,6 +104,31 @@ namespace Esferas.Data
                 .HasOne(r => r.Categoria)
                 .WithMany()
                 .HasForeignKey(r => r.CategoriaId);
+
+            modelBuilder.Entity<InformeGenerado>().ToTable("InformesGenerados");
+
+            modelBuilder.Entity<InformeGenerado>().HasKey(i => i.Id);
+
+            modelBuilder.Entity<InformeGenerado>().Property(i => i.Token)
+                .IsRequired();
+
+            modelBuilder.Entity<InformeGenerado>().HasIndex(i => new { i.EncuestaId, i.Token })
+                .IsUnique();
+
+            modelBuilder.Entity<InformeGenerado>().Property(i => i.ContenidoHtml)
+                .IsRequired()
+                .HasColumnType("nvarchar(max)");
+
+            modelBuilder.Entity<InformeGenerado>().Property(i => i.FechaGeneracion)
+                .IsRequired();
+
+            modelBuilder.Entity<InformeGenerado>().HasOne(i => i.Encuesta)
+                .WithMany() // si más adelante querés agregar una colección en Encuesta, podés cambiarlo a .WithMany(e => e.Informes)
+                .HasForeignKey(i => i.EncuestaId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<InformeGenerado>().Property(i => i.FechaExpiracion)
+                .IsRequired(false);
         }
     }
 }

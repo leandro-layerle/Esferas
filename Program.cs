@@ -40,7 +40,11 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<PreguntaImportService>();
 builder.Services.AddScoped<LinkUnicoService>();
 builder.Services.AddScoped<ResultadosEmpresaService>();
+builder.Services.AddScoped<InformeMistralService>();
+builder.Services.AddHttpClient<InformeMistralService>();
 builder.Services.AddScoped<DashboardService>();
+builder.Services.AddScoped<InformePdfService>();
+
 
 var app = builder.Build();
 

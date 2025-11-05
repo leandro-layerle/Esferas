@@ -8,6 +8,8 @@ namespace Esferas.Models.ViewModels
         public double PromedioGeneral { get; set; }
         public string ColorPromedioGeneral { get; set; } // "#28a745", "#ffc107", "#dc3545"
         public List<EsferaResultadoDto> EsferasPrimarias { get; set; } = new();
-        public int EncuestaId { get; set; } 
+        public int EncuestaId { get; set; }
+        public Guid Token { get; set; }
+
     }
 }

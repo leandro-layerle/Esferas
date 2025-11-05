@@ -13,6 +13,7 @@ namespace Esferas.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly ResultadosEmpresaService _resultadosEmpresaService;
+        private readonly InformeGPTService _informeGPTService;
 
         public ResultadosController(ApplicationDbContext context, ResultadosEmpresaService resultadosEmpresaService)
         {
@@ -33,6 +34,7 @@ namespace Esferas.Controllers
             var datos = await _resultadosEmpresaService.ObtenerEsferasSecundariasAsync(encuestaId, primariaId);
             return Ok(datos);
         }
+
 
         //// URL: /r/{token:guid}
         //[HttpGet]

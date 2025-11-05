@@ -50,9 +50,7 @@ namespace Esferas.Services
                 .ToListAsync();
 
             // Calcular promedio general desde los resultados primarios
-            var promedioGeneral = resultados.Any()
-                ? resultados.Average(x => x.Promedio)
-                : 0;
+            var promedioGeneral = resultados.Any() ? resultados.Average(x => x.Promedio) : 0;
 
             var colorGeneral = CalcularColorSemaforo(promedioGeneral, umbralRojo, umbralAmarillo);
 
@@ -71,7 +69,8 @@ namespace Esferas.Services
                 PromedioGeneral = promedioGeneral,
                 ColorPromedioGeneral = colorGeneral,
                 EsferasPrimarias = dtoList,
-                EncuestaId = encuestaId
+                EncuestaId = encuestaId,
+                Token = token
             };
         }
 
@@ -117,5 +116,47 @@ namespace Esferas.Services
             else
                 return SemaforoColor.Verde;
         }
+
+        public async Task<EmpresaResultadosViewModel> ObtenerResultadosPorEncuestaIdAsync(int encuestaId)
+        {
+            // Umbrales desde configuración
+            var umbralRojo = _config.GetValue<double>("UmbralesSemaforo:RojoHasta");
+            var umbralAmarillo = _config.GetValue<double>("UmbralesSemaforo:AmarilloHasta");
+
+            // Obtener resultados por esfera primaria
+            var resultados = await _context.Resultados
+                .Where(r => r.EncuestaId == encuestaId)
+                .Join(
+                    _context.Categorias.Where(c => c.Tipo == TipoCategoria.Primaria),
+                    r => r.CategoriaId,
+                    c => c.Id,
+                    (r, c) => new { c.Id, c.Nombre, r.Promedio }
+                )
+                .ToListAsync();
+
+            // Calcular promedio general desde los resultados primarios
+            var promedioGeneral = resultados.Any() ? resultados.Average(x => x.Promedio) : 0;
+
+            var colorGeneral = ResultadosEmpresaService.CalcularColorSemaforo(promedioGeneral, umbralRojo, umbralAmarillo);
+
+            var dtoList = resultados
+                .Select(x => new EsferaResultadoDto
+                {
+                    CategoriaId = x.Id,
+                    Nombre = x.Nombre,
+                    Promedio = x.Promedio,
+                    ColorSemaforo = ResultadosEmpresaService.CalcularColorSemaforo(x.Promedio, umbralRojo, umbralAmarillo)
+                })
+                .ToList();
+
+            return new EmpresaResultadosViewModel
+            {
+                PromedioGeneral = promedioGeneral,
+                ColorPromedioGeneral = colorGeneral,
+                EsferasPrimarias = dtoList,
+                EncuestaId = encuestaId
+            };
+        }
+
     }
 }

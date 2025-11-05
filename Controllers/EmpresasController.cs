@@ -16,12 +16,14 @@ namespace Esferas.Controllers
         private readonly ApplicationDbContext _context;
         private readonly ResultadosEmpresaService _resultadosService;
         private readonly IConfiguration _config;
+        private readonly InformeMistralService _informeMistralService;
 
-        public EmpresasController(ApplicationDbContext context, ResultadosEmpresaService resultadosService, IConfiguration config)
+        public EmpresasController(ApplicationDbContext context, ResultadosEmpresaService resultadosService, IConfiguration config, InformeMistralService informeMistralService)
         {
             _context = context;
             _resultadosService = resultadosService;
             _config = config;
+            _informeMistralService = informeMistralService;
         }
 
 
@@ -147,6 +149,19 @@ namespace Esferas.Controllers
                 .ToListAsync();
 
             return Json(secundarias);
+        }
+
+        [HttpGet("/empresa/r/{token}/informe")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GenerarInforme(Guid token)
+        {
+            var viewModel = await _resultadosService.ObtenerResultadosPorTokenAsync(token);
+            if (viewModel == null)
+                return NotFound("No se encontraron resultados para el token proporcionado.");
+
+            var informe = await _informeMistralService.GenerarInformeAsync(viewModel.EsferasPrimarias, viewModel.PromedioGeneral);
+
+            return Content(informe, "text/plain", System.Text.Encoding.UTF8);
         }
 
 

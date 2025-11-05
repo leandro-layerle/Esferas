@@ -84,10 +84,33 @@
             </div>
         </div>
     </div>
+
+    <!-- Card Informe GPT -->
+    <div class="card mt-4 shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Informe de Diagnóstico Organizacional</h5>
+            <button id="btnGenerarInforme" class="btn btn-outline-primary btn-sm">
+                Generar Informe
+            </button>
+            @* <button id="btnDescargarPdf" class="btn btn-outline-danger btn-sm ms-2">
+                <i class="bi bi-file-earmark-pdf"></i> Descargar PDF
+            </button> *@
+        </div>
+        <div class="card-body">
+            <div id="informeContainer" class="text-body" style="min-height: 200px;">
+                <p class="text-muted">Haz clic en “Generar Informe” para obtener el diagnóstico.</p>
+            </div>
+        </div>
+    </div>
+
+
 </div>
 
 @section Scripts {
        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const token = "@Model.Token";
+    </script>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -213,6 +236,25 @@
                 });
             });
 
+            // Informe GPT
+            document.getElementById("btnGenerarInforme").addEventListener("click", async () => {
+                const container = document.getElementById("informeContainer");
+                container.innerHTML = "<div class='text-center my-3'><div class='spinner-border text-primary'></div><p>Generando informe...</p></div>";
+
+                try {
+                    const response = await fetch(`/api/informes/generar?token=${token}`);
+                    const html = await response.text();
+                    container.innerHTML = html; // 👈 Ya viene con formato HTML
+                } catch (error) {
+                    container.innerHTML = "<p class='text-danger'>Error al generar el informe.</p>";
+                }
+            });
+
+            // Descargar PDF
+            // document.getElementById("btnDescargarPdf").addEventListener("click", () => {
+            //         const token = "@Context.Request.RouteValues["token"]";
+            //         window.open(`/api/informes/pdf?token=${token}`, '_blank');
+            //     });
 
         });
        
@@ -220,230 +262,3 @@
 
 
 }
-
-
-@* @model Esferas.Models.ViewModels.EmpresaResultadosViewModel
-
-@{
-    ViewData["Title"] = "Resultados Empresa";
-}
-
-<style>
-    .esfera-click {
-        cursor: pointer;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-        .esfera-click:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 10px rgba(0,0,0,0.3);
-        }
-</style>
-
-<div class="container py-4">
-    <h2 class="mb-4">Resultados Generales</h2>
-
-    <div class="row mb-4">
-        <!-- Card Promedio General -->
-        <div class="col-md-4">
-            <div class="card text-white text-center" style="background-color:@Model.ColorPromedioGeneral">
-                <div class="card-body">
-                    <h5 class="card-title">Promedio General</h5>
-                    <p class="display-4 fw-bold">@Model.PromedioGeneral.ToString("0.00")</p>
-                    <p class="mb-0 text-white-50">Valor sugerido: 6.50</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Esferas Primarias -->
-    <div class="card shadow-sm mb-5">
-        <div class="card-body">
-            <h4 class="card-title text-center mb-4">Esferas de Efectividad</h4>
-            <div class="row text-center">
-                @foreach (var esfera in Model.EsferasPrimarias)
-                {
-                    <div class="col-6 col-md-2 mb-4 d-flex flex-column align-items-center justify-content-center">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center shadow esfera-click"
-                             data-id="@esfera.CategoriaId"
-                             style="width: 90px; height: 90px; background-color:@esfera.ColorSemaforo;">
-                            <span class="fw-bold text-white fs-4">
-                                @esfera.Promedio.ToString("0.0")
-                            </span>
-                        </div>
-                        <small class="mt-2 fw-semibold text-secondary">@esfera.Nombre</small>
-                    </div>
-                }
-            </div>
-        </div>
-    </div>
-    <div id="esferasSecundariasContainer"></div>
-
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <h5 class="card-title text-center">Resultados por Eje Principal</h5>
-            <div style="height: 300px;">
-                <canvas id="graficoEsferasPrimarias"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <div class="card mt-4">
-        <div class="card-body">
-            <h5 class="card-title">Esferas Secundarias</h5>
-            <div style="height: 400px;">
-                <canvas id="graficoEsferasSecundarias"></canvas>
-            </div>
-        </div>
-    </div>
-
-</div>
-@section Scripts {
-    <script>
-        document.querySelectorAll('.rounded-circle').forEach(circle => {
-            circle.addEventListener('click', async function () {
-                const categoriaId = this.getAttribute('data-id');
-                const token = '@Context.Request.RouteValues["token"]';
-
-                const res = await fetch(`/empresa/esferas-secundarias?token=${token}&categoriaPrimariaId=${categoriaId}`);
-                const data = await res.json();
-
-                const container = document.getElementById('esferasSecundariasContainer');
-                if (data.length === 0) {
-                    container.innerHTML = '';
-                    return;
-                }
-
-                let html = `
-                <div class="card shadow-sm mb-4">
-                    <div class="card-body">
-                        <h5 class="card-title text-center mb-4">Esferas Secundarias</h5>
-                        <div class="row text-center">`;
-
-                data.forEach(esfera => {
-                    html += `
-                        <div class="col-6 col-md-2 mb-4 d-flex flex-column align-items-center justify-content-center">
-                            <div class="rounded-circle d-flex align-items-center justify-content-center shadow"
-                                 style="width: 90px; height: 90px; background-color:${esfera.colorSemaforo};">
-                                <span class="fw-bold text-white fs-4">${esfera.promedio.toFixed(1)}</span>
-                            </div>
-                            <small class="mt-2 fw-semibold text-secondary">${esfera.nombre}</small>
-                        </div>`;
-                });
-
-                html += `</div></div></div>`;
-                container.innerHTML = html;
-            });
-        });
-    </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <script>
-        const canvas = document.getElementById('graficoEsferasPrimarias');
-        const ctx = canvas.getContext('2d');
-
-        const nombres = @Html.Raw(Json.Serialize(Model.EsferasPrimarias.Select(e => e.Nombre)));
-        const promedios = @Html.Raw(Json.Serialize(Model.EsferasPrimarias.Select(e => Math.Round(e.Promedio, 2))));
-        const coloresSemaforo = @Html.Raw(Json.Serialize(Model.EsferasPrimarias.Select(e => e.ColorSemaforo)));
-
-        // Función para crear degradado vertical
-                function crearGradiente(colorBase) {
-            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-            gradient.addColorStop(0, colorBase); // Color puro arriba
-            gradient.addColorStop(0.5, colorBase + 'CC'); // 80% opacidad en medio
-            gradient.addColorStop(1, colorBase + '99'); // 60% opacidad abajo
-            return gradient;
-        }
-
-        const backgroundColors = coloresSemaforo.map(color => crearGradiente(color));
-
-        const grafico = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: nombres,
-                datasets: [{
-                    label: 'Promedio',
-                    data: promedios,
-                    backgroundColor: backgroundColors,
-                    borderRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        suggestedMax: 10,
-                        ticks: {
-                            stepSize: 1
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return context.parsed.y.toFixed(2);
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    </script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const encuestaId = @Model.EncuestaId;
-
-            fetch(`/api/resultados/esferas-secundarias?encuestaId=${encuestaId}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (!data || data.length === 0) return;
-
-                    const ctx = document.getElementById('graficoEsferasSecundarias').getContext('2d');
-                    const labels = data.map(e => e.nombre);
-                    const valores = data.map(e => e.promedio.toFixed(2));
-                    const colores = data.map(e => e.colorSemaforo);
-
-                    new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                data: valores,
-                                backgroundColor: colores,
-                                borderRadius: 6,
-                            }]
-                        },
-                        options: {
-                            indexAxis: 'y',
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            scales: {
-                                x: {
-                                    beginAtZero: true,
-                                    suggestedMax: 10
-                                }
-                            },
-                            plugins: {
-                                legend: { display: false },
-                                tooltip: {
-                                    callbacks: {
-                                        label: context => `${context.parsed.x}`
-                                    }
-                                }
-                            }
-                        }
-                    });
-                });
-        });
-    </script>
-    
-
-}
- *@
