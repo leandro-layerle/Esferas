@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Policy;
 
 namespace Esferas.Controllers
 {
@@ -26,8 +27,9 @@ namespace Esferas.Controllers
         {
             var encuestas = await _context.Encuestas
                 .Include(e => e.Empresa)
+                .Include(e => e.Links)
                 .ToListAsync();
-
+                       
             return View(encuestas);
         }
 
@@ -137,7 +139,7 @@ namespace Esferas.Controllers
             var url = await _linkUnicoService.GenerarLinkEmpresaAsync(encuestaId);
 
             TempData[$"LinkEmpresa_{encuestaId}"] = url;
-            return RedirectToAction("Edit", new { id = encuestaId });
+            return RedirectToAction("Index", new { id = encuestaId });
         }
 
     }

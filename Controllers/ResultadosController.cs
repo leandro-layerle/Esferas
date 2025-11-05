@@ -1,6 +1,7 @@
 ﻿using Esferas.Data;
 using Esferas.Models.DTOs;
 using Esferas.Models.Enums;
+using Esferas.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,16 +12,26 @@ namespace Esferas.Controllers
     public class ResultadosController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ResultadosEmpresaService _resultadosEmpresaService;
 
-        public ResultadosController(ApplicationDbContext context)
+        public ResultadosController(ApplicationDbContext context, ResultadosEmpresaService resultadosEmpresaService)
         {
             _context = context;
+            _resultadosEmpresaService = resultadosEmpresaService;
         }
 
         public IActionResult Index(int encuestaId)
         {
             ViewBag.EncuestaId = encuestaId;
             return View();
+        }
+
+        [AllowAnonymous]
+        [HttpGet("/api/resultados/esferas-secundarias")]
+        public async Task<IActionResult> ObtenerEsferasSecundarias(int encuestaId, int? primariaId)
+        {
+            var datos = await _resultadosEmpresaService.ObtenerEsferasSecundariasAsync(encuestaId, primariaId);
+            return Ok(datos);
         }
 
         //// URL: /r/{token:guid}

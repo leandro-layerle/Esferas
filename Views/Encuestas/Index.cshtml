@@ -46,20 +46,26 @@
                     <a class="btn btn-sm btn-info" asp-controller="Resultados" asp-action="Index" asp-route-encuestaId="@e.Id">
                         Ver Resultados
                     </a>
-                </td>
-                <form asp-action="GenerarLinkEmpresa" asp-controller="Encuestas" method="post" style="display:inline;">
-                    <input type="hidden" name="encuestaId" value="@e.Id" />
-                    <button type="submit" class="btn btn-sm btn-outline-primary">Generar link público</button>
-                </form>
+                    @if (e.Links.FirstOrDefault(l => l.EncuestaId == e.Id && l.EsLinkEmpresa) != null)
+                    {
+                        var link = e.Links.FirstOrDefault(l => l.EncuestaId == e.Id && l.EsLinkEmpresa);
 
-                @if (TempData[$"LinkEmpresa_{e.Id}"] != null)
-                {
-                    <div class="mt-1">
-                        <a href="@TempData[$"LinkEmpresa_{e.Id}"]" target="_blank" class="badge bg-success">
-                            Ver link público
-                        </a>
-                    </div>
-                }
+                        <span>Link Dashboard: </span>
+                
+                        <a href="/empresa/r/@link.Token" class="btn-sm btn-primary" target="_blank">@link.Token</a>
+                    }
+                    else
+                    {
+                        <form asp-controller="Encuestas" asp-action="GenerarLinkEmpresa" method="post" style="display:inline;">
+                            <input type="hidden" name="encuestaId" value="@e.Id" />
+                            <button type="submit" class="btn btn-sm btn-secondary">
+                                Generar Link Público
+                            </button>
+                        </form>
+                    }
+                </td>
+               
+
 
             </tr>
         }

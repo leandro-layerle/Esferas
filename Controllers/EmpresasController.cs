@@ -1,5 +1,7 @@
 ﻿using Esferas.Data;
+using Esferas.Models.DTOs;
 using Esferas.Models.Entities;
+using Esferas.Models.Enums;
 using Esferas.Models.ViewModels;
 using Esferas.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -13,11 +15,13 @@ namespace Esferas.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly ResultadosEmpresaService _resultadosService;
+        private readonly IConfiguration _config;
 
-        public EmpresasController(ApplicationDbContext context, ResultadosEmpresaService resultadosService)
+        public EmpresasController(ApplicationDbContext context, ResultadosEmpresaService resultadosService, IConfiguration config)
         {
             _context = context;
             _resultadosService = resultadosService;
+            _config = config;
         }
 
 
@@ -113,6 +117,38 @@ namespace Esferas.Controllers
 
             return View("Resultados", viewModel);
         }
+
+        [HttpGet("/empresa/esferas-secundarias")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetEsferasSecundarias(Guid token, int categoriaPrimariaId)
+        {
+            var encuestaId = await _context.LinksUnicos
+                .Where(l => l.Token == token && l.EsLinkEmpresa)
+                .Select(l => l.EncuestaId)
+                .FirstOrDefaultAsync();
+
+            if (encuestaId == 0)
+                return BadRequest("Token inválido o no relacionado con empresa.");
+
+            var umbralRojo = _config.GetValue<double>("UmbralesSemaforo:RojoHasta");
+            var umbralAmarillo = _config.GetValue<double>("UmbralesSemaforo:AmarilloHasta");
+
+            var secundarias = await _context.Resultados
+                .Where(r => r.EncuestaId == encuestaId)
+                .Join(_context.Categorias, r => r.CategoriaId, c => c.Id, (r, c) => new { r, c })
+                .Where(x => x.c.Tipo == TipoCategoria.Secundaria && x.c.CategoriaPadreId == categoriaPrimariaId)
+                .Select(x => new EsferaSecundariaDto
+                {
+                    Nombre = x.c.Nombre,
+                    Promedio = x.r.Promedio,
+                    ColorSemaforo = ResultadosEmpresaService.CalcularColorSemaforo(
+                        x.r.Promedio, umbralRojo, umbralAmarillo)
+                })
+                .ToListAsync();
+
+            return Json(secundarias);
+        }
+
 
     }
 }
